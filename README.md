@@ -1,0 +1,2 @@
+# tricount-project
+Hexagonal architecture
