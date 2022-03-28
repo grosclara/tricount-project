@@ -1,15 +1,13 @@
 export default class Expense {
     id: number;
     title: string;
-    description: string;
     amount: number;
-    userId: string;
+    username: string;
 
-    constructor(title: string, amount: number, userId: string, description?: string){
+    constructor(title: string, amount: number, username: string){
         this.id = Date.now();
         this.title = title;
         this.amount = amount;
-        this.userId = userId;
-        this.description = description ? description : "";
+        this.username = username;
     }
 }
