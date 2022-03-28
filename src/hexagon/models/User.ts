@@ -1,11 +1,7 @@
-export default class Expense {
-    id: number;
-    firstName: string;
-    lastName: string;
+export default class User {
+    username: string;
 
-    constructor(firstName: string, lastName: string){
-        this.id = Date.now();
-        this.firstName = firstName;
-        this.lastName = lastName;
+    constructor(username: string){
+        this.username = username;
     }
 }
