@@ -1,20 +1,22 @@
-import { ExpenseInMemoryAdapter } from "../../adapters/driven/expense.in.memory.adapter";
 import Expense from "../models/Expense";
-import User from "../models/User";
 import ForStoringExpenses from "../ports/driven/for.storing.expenses";
+import ForStoringUsers from "../ports/driven/for.storing.users";
 import ForRecordingExpenses from "../ports/driver/for.recording.expenses";
 
 export class ExpenseRecorder implements ForRecordingExpenses {
     
     expenseRepository: ForStoringExpenses
+    userRepository: ForStoringUsers
 
     constructor(
-        expenseRepository: ForStoringExpenses, 
+        expenseRepository: ForStoringExpenses,
+        userRepository: ForStoringUsers
     ){
         this.expenseRepository = expenseRepository;
+        this.userRepository = userRepository;
     }
     
-    RecordExpense(expense: Expense): void {
-        throw new Error("Invalid amount error");
+    RecordExpense(title: string, amount: number, username: string): Expense {
+        throw new Error("Method not implemented");
     }
 }

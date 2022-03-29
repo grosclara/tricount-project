@@ -8,34 +8,19 @@ const expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
-import { ExpenseInMemoryAdapter } from '../src/adapters/driven/expense.in.memory.adapter';
 import Expense from '../src/hexagon/models/Expense';
+import User from '../src/hexagon/models/User';
 import { ExpenseRecorder } from '../src/hexagon/usecases/ExpenseRecorder';
+import InvalidAmountError from '../src/errors/InvalidAmountError';
+
+// test avec montant négatif [test avec montant qui n'est pas un chiffre]
+// test avec username qui n'existe pas
+// test qui fonctionne (amount >0 / user valide)
+
+//RecordExpense( amount: number, username: string ) : Expense ;
 
 describe('ExpenseRecorder', () => {
-	it('given an expense Repository when adding an expense with an invalid amount then it should fail with invalid amount error', () => {
-		// ARRANGE
-		const mockExpenseRepository = { getAllExpenses: sinon.stub(), createExpense: sinon.stub() }
-    	const expenseRecorder = new ExpenseRecorder(mockExpenseRepository)
-
-		// ACT
-		let invalidExpense = new Expense("Negative amount", -1, "Clara");
-
-		// ASSERT
-		expect(() => expenseRecorder.RecordExpense(invalidExpense)).to.throw(Error, 'Invalid amount error');
-		expect(mockExpenseRepository.createExpense).to.have.not.been.called;
-	});
-	it('given an expense Repository when adding a valid expense then it should create the expense', () => {
-		// ARRANGE
-		const mockExpenseRepository = { getAllExpenses: sinon.stub(), createExpense: sinon.stub() }
-    	const expenseRecorder = new ExpenseRecorder(mockExpenseRepository)
-
-		// ACT
-		let validExpense = new Expense("Valid expense", 20, "Clara");
-		expenseRecorder.RecordExpense(validExpense);
-		
-		// ASSERT
-		expect(mockExpenseRepository.createExpense).to.have.been.calledOnceWithExactly(validExpense);
-	})
-
+	it.skip('GIVEN a new expense recorder, WHEN adding an expense with a negative amount, THEN it should fail with an invalid amount error');
+	it.skip('GIVEN a new expense recorder, WHEN adding an expense with an unknown user, THEN it should fail with unknown user error');
+	it.skip('GIVEN a new expense recorder, WHEN adding an expense with a valid amount and a known user, THEN it should add the expense to the repository');
 })
