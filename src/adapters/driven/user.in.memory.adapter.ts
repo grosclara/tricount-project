@@ -11,8 +11,8 @@ export class UserInMemoryAdapter implements UserRepository {
 	getAllUsers(): Promise<User[]> {
 		return Promise.resolve(this.users);
 	}
-	createUser(user: User): Promise<void> {
+	createUser(user: User): Promise<User> {
 		this.users.push(user);
-		return Promise.resolve();
+		return Promise.resolve(user);
 	}
 }

@@ -1,3 +1,4 @@
+import UserAlreadyExistsError from "../../errors/UserAlreadyExistsError";
 import User from "../models/User";
 import ForStoringUsers from "../ports/driven/for.storing.users";
 import ForRecordingUsers from "../ports/driver/for.recording.users";
@@ -12,8 +13,17 @@ export class UserRecorder implements ForRecordingUsers {
         this.userRepository = userRepository;
     }
 
-    CreateUser(username: string): User {
-        throw new Error("Method not implemented.");
+    async CreateUser(username: string): Promise<User> {
+        let userToAdd = new User(username);
+        const users = await this.userRepository.getAllUsers();
+        users.forEach((user) => {
+            if (user.username.toLowerCase() === userToAdd.username.toLowerCase()){
+                throw new UserAlreadyExistsError(`User already exists error: ${username} already exists in database`);
+            }
+        })
+        const createdUser = await this.userRepository.createUser(userToAdd);   
+
+        return createdUser; 
     }
     GetAllUsers(): User[] {
         throw new Error("Method not implemented.");
