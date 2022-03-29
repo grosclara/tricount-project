@@ -8,18 +8,9 @@ const expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
-import { UserInMemoryAdapter } from '../src/adapters/driven/user.in.memory.adapter';
 import User from '../src/hexagon/models/User';
 import { UserRecorder } from '../src/hexagon/usecases/UserRecorder';
 import UserAlreadyExistsError from '../src/errors/UserAlreadyExistsError';
-
-// There is a user named Sophie, I try to add another one named Sophie : fail 
-// There is a user named Sophie, I try to add another one named sophie : fail 
-// There is a user named Sophie, I try to add another one named Sophie G. : OK
-// Get all users when ther is no users : empty
-// Get all users when one user is creatd 
-// Get all users when there are 2 users
-
 
 describe('User Recorder', () => {
 	it('given an user Repository without any user, when adding a user with a username "Sophie" then it should add the user', async () => {
