@@ -91,4 +91,51 @@ describe('User Recorder', () => {
 		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
 		expect(result).to.eql(userToAdd);
 	});
+
+	it('given an empty user Repository, when getting all the users then it should get an empty array', async () => {
+		const mockUserRepository = { getAllUsers: sinon.stub().resolves([]), createUser: sinon.stub() };
+    	const userRecorder = new UserRecorder(mockUserRepository);
+
+		// ACT
+		let result = await userRecorder.GetAllUsers();
+
+		// ASSERT
+		expect(mockUserRepository.createUser).to.not.have.been.called;
+		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
+		expect(result).to.eql([]);
+	});
+
+	it('given an user Repository with one user, when getting all the users then it should get an array containing the one user', async () => {
+		let username = 'Sophie';
+		let userInDB = new User(username);
+		
+		const mockUserRepository = { getAllUsers: sinon.stub().resolves([userInDB]), createUser: sinon.stub() };
+    	const userRecorder = new UserRecorder(mockUserRepository);
+
+		// ACT
+		let result = await userRecorder.GetAllUsers();
+
+		// ASSERT
+		expect(mockUserRepository.createUser).to.not.have.been.called;
+		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
+		expect(result).to.eql([userInDB]);
+	});
+
+	it('given an user Repository with two users, when getting all the users then it should get an array containing the two users', async () => {
+		let username1 = 'Sophie';
+		let userInDB1 = new User(username1);
+		let username2 = 'Lionel';
+		let userInDB2 = new User(username2);
+		
+		const mockUserRepository = { getAllUsers: sinon.stub().resolves([userInDB1, userInDB2]), createUser: sinon.stub() };
+    	const userRecorder = new UserRecorder(mockUserRepository);
+
+		// ACT
+		let result = await userRecorder.GetAllUsers();
+
+		// ASSERT
+		expect(mockUserRepository.createUser).to.not.have.been.called;
+		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
+		expect(result).to.eql([userInDB1, userInDB2]);
+	});
 })

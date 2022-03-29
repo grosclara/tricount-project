@@ -25,7 +25,7 @@ export class UserRecorder implements ForRecordingUsers {
 
         return createdUser; 
     }
-    GetAllUsers(): User[] {
-        throw new Error("Method not implemented.");
+    async GetAllUsers(): Promise<User[]> {
+        return this.userRepository.getAllUsers();
     }
 }
