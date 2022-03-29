@@ -15,7 +15,7 @@ import UnknownUserError from '../src/errors/UnknownUserError';
 import Expense from '../src/hexagon/models/Expense';
 
 describe('ExpenseRecorder', () => {
-	it('GIVEN a new expense recorder, WHEN adding an expense with a negative amount, THEN it should fail with an invalid amount error', () => {
+	it('GIVEN a new expense recorder, WHEN adding an expense with a negative amount, THEN it should fail with an invalid amount error', async () => {
 		// ARRANGE
 		const amount = -1;
 		const username = "Clara"
@@ -27,13 +27,13 @@ describe('ExpenseRecorder', () => {
 	
 		// ACT
 		const promise = expenseRecorder.RecordExpense(title, amount, username);
-	
+
 		// ASSERT
-		expect(promise).to.be.rejectedWith(InvalidAmountError, `Invalid amount error: ${amount} should be a positive integer`);
+		await expect(promise).to.be.rejectedWith(InvalidAmountError, `Invalid amount error: ${amount} should be a positive integer`);
 		expect(mockUserRepository.getAllUsers).to.have.not.been.called;
 		expect(mockExpenseRepository.createExpense).to.have.not.been.called;
 	});
-	it('GIVEN a new expense recorder, WHEN adding an expense with an unknown user, THEN it should fail with unknown user error', () => {		
+	it('GIVEN a new expense recorder, WHEN adding an expense with an unknown user, THEN it should fail with unknown user error', async () => {		
 		// ARRANGE
 		const amount = 10;
 		const username = "Jeanne"
@@ -49,7 +49,7 @@ describe('ExpenseRecorder', () => {
 		const promise = expenseRecorder.RecordExpense(title, amount, username);
 
 		// ASSERT
-		expect(promise).to.be.rejectedWith(UnknownUserError, `Unknown user error: ${username} does not exist yet`);
+		await expect(promise).to.be.rejectedWith(UnknownUserError, `Unknown user error: ${username} does not exist yet`);
 		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
 		expect(mockExpenseRepository.createExpense).to.have.not.been.called;
 	});
