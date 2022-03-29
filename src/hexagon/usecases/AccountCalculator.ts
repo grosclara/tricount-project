@@ -19,5 +19,4 @@ export class AccountCalculator implements ForBalancingAccounts {
     GetAccountBalance(): Map<User, Map<User, number>> {
         throw new Error("Method not implemented.");
     }
-
 }

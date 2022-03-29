@@ -6,3 +6,4 @@ export default interface ForStoringExpenses
 	createExpense(expense: Expense): Promise<Expense>;
 }
 
+
