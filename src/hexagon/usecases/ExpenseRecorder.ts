@@ -1,3 +1,4 @@
+import { InvalidAmountError } from "../../errors/InvalidAmountError";
 import Expense from "../models/Expense";
 import ForStoringExpenses from "../ports/driven/for.storing.expenses";
 import ForStoringUsers from "../ports/driven/for.storing.users";
@@ -17,6 +18,6 @@ export class ExpenseRecorder implements ForRecordingExpenses {
     }
     
     RecordExpense(title: string, amount: number, username: string): Expense {
-        throw new Error("Method not implemented");
+        throw new InvalidAmountError('Invalid amount error');
     }
 }
