@@ -19,12 +19,17 @@ export default class ExpenseRecorder implements ForRecordingExpenses {
     }
     
     async RecordExpense(title: string, amount: number, username: string): Promise<Expense> {
+
         if (amount < 0)
-            throw new InvalidAmountError('Invalid amount error');
-        let users = await this.userRepository.getAllUsers();
+            throw new InvalidAmountError(`Invalid amount error: ${amount} should be a positive integer`);
+
+        const users = await this.userRepository.getAllUsers();
         if (!users.some(user => user.username === username))
-            throw new UnknownUserError('Unknown user error');
-       
-        return new Expense(title, amount, username);
+            throw new UnknownUserError(`Unknown user error: ${username} does not exist yet`);
+
+        let expenseToAdd = new Expense(title, amount, username);
+        const createdExpense = await this.expenseRepository.createExpense(expenseToAdd);   
+        
+        return createdExpense; 
     }
 }
