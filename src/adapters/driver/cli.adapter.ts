@@ -51,7 +51,8 @@ export default class CliAdapter {
     }
 
     private addUser(): Promise<void> {
-        throw new Error("Method not implemented");
+        return this.terminal.readInput('\nEnter a unique username: ')
+        .then(() => { Promise.resolve()})
     }
 
     private addExpense(): Promise<void> {

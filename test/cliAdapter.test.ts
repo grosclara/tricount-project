@@ -94,7 +94,23 @@ describe('CliAdapter', () => {
             expect(mockTerminal.print).to.be.not.calledWith('Welcome to your Tricount!');
             expect(mockTerminal.print).to.be.calledWith('ok bye!\n');
         });
-        it.skip('GIVEN a new CLI with with no previous member, WHEN one wants to create a new Tricount, THEN it should ask for adding a member to the Tricount');
+        it('GIVEN a new CLI with with no previous member, WHEN one wants to create a new Tricount, THEN it should ask for adding a member to the Tricount', async () => {
+            const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub() };
+            const mockExpenseRecorder = { RecordExpense: sinon.stub() }
+            const mockUserRecorder = { GetAllUsers: sinon.stub().resolves([]), CreateUser: sinon.stub() }
+            const mockAccountCalculator = { GetAccountBalance: sinon.stub() }
+
+            mockTerminal.readInput.resolves('y');
+
+            const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
+
+            // ACT
+            await cli.start();
+
+            // ASSERT
+            expect(mockTerminal.readInput).to.be.calledWith('\nDo you want to create a new Tricount? [y/N] ');
+            expect(mockTerminal.readInput).to.be.calledWith('\nEnter a unique username: ');
+        });
         it.skip('GIVEN a new CLI with with no previous member, WHEN one wants to validate the Tricount creation with exactly 1 member, THEN it should print a warning message and ask for adding another user');
         it.skip('GIVEN a new CLI with with no previous member, WHEN one wants to add 2 members with the same username, THEN it should print a AlreadyExistingUser error');
         it.skip('[happy path] GIVEN a new CLI with with no previous member, WHEN one adds 2 distinct members and validate, THEN it should print a success message');
