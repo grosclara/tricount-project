@@ -96,7 +96,6 @@ export class AccountCalculator implements ForBalancingAccounts {
                 }
             }
         });
-        this.printRawDebts(rawDebts);
 
         return rawDebts;
 
@@ -108,16 +107,5 @@ export class AccountCalculator implements ForBalancingAccounts {
 
     async getAllExpenses(): Promise<Expense[]> {
         return this.expenseRepository.getAllExpenses();
-    }
-
-    printRawDebts(balances: Map<User, Map<User, number>>): void {
-        console.log('on print les raw debts');
-        for (var [user, debts] of balances) {
-            console.log('Dettes de ' + user.username);
-            for (var [lender, debtAmount] of debts) {
-                console.log(`Créancier : ${lender.username}, amount : ${debtAmount}`);
-            }
-            console.log('');
-        }
     }
 }
