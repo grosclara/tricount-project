@@ -20,16 +20,17 @@ export default class CliAdapter {
         this.accountingBalancer = accountingBalancer;
     }
 
-    public start() : Promise<void> {
-        return this.terminal.print('Hello, I\'m the Tricount CLI :)\n');
+    public start() : Promise<string> {
+        return this.terminal.print('Hello, I\'m the Tricount CLI :)\n')
+        .then(() => { return this.createTricount() })
     }
 
     private run(): Promise<void> {
         throw new Error("Method not implemented");
     }
 
-    private createTricount(): Promise<boolean> {
-        throw new Error("Method not implemented");
+    private createTricount(): Promise<string> {
+        return this.terminal.readInput('\nDo you want to create a new Tricount? [y/N] ');
     }
 
     private addUser(): Promise<void> {
