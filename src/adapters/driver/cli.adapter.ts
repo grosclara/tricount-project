@@ -20,8 +20,8 @@ export default class CliAdapter {
         this.accountingBalancer = accountingBalancer;
     }
 
-    public start() {
-        throw new Error("Method not implemented");
+    public start() : Promise<void> {
+        return this.terminal.print('Hello, I\'m the Tricount CLI :)\n');
     }
 
     private run(): Promise<void> {
