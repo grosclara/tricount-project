@@ -22,23 +22,23 @@ import { AccountCalculator } from '../src/hexagon/usecases/AccountCalculator';
 // calculer les balances si plusieurs personnes ont fait au moins une dépenses
 // calculer les balances avec des dépenses qui ne sont pas des multiples de 3
 
-function areBalancesEqual(balances: Map<String, Map<String, number>>, expectedBalances: Map<String, Map<String, number>>): Boolean {
+function areBalancesEqual(balances: Map<User, Map<User, number>>, expectedBalances: Map<User, Map<User, number>>): Boolean {
     if (balances.size !== expectedBalances.size) return false;
 
-    for (var [userName, expectedUserDebts] of expectedBalances) {
-        if (!balances.has(userName)) return false;
-        const userDebts = balances.get(userName);
+    for (var [user, expectedUserDebts] of expectedBalances) {
+        if (!balances.has(user)) return false;
+        const userDebts = balances.get(user);
         if (!userDebts) return false;
         if (!areUserDebtsEquals(userDebts, expectedUserDebts)) return false;
     }
     return true;
 }
 
-function areUserDebtsEquals(debts: Map<String, number>, expectedDebts: Map<String, number>): Boolean {
+function areUserDebtsEquals(debts: Map<User, number>, expectedDebts: Map<User, number>): Boolean {
     if (debts.size !== expectedDebts.size) return false;
-    for (var [lenderName, debtAmount] of expectedDebts) {
-        if (!debts.has(lenderName)) return false;
-        if (debts.get(lenderName) != debtAmount || !debts.get(lenderName)) return false;
+    for (var [lender, debtAmount] of expectedDebts) {
+        if (!debts.has(lender)) return false;
+        if (debts.get(lender) != debtAmount || !debts.get(lender)) return false;
     }
     return true;
 }
@@ -48,9 +48,9 @@ describe('Account Calculator tests', () => {
 
     beforeEach('parametrage', () => {
         mockUsers = [
-            { username: 'Clara'},
-            { username: 'Jeanne'},
-            { username: 'Julie'}
+            new User('Clara'),
+            new User('Jeanne'),
+            new User('Julie'),
         ];
     });
 
@@ -82,19 +82,19 @@ describe('Account Calculator tests', () => {
             const mockExpenses: Expense[] = [
                 {
                     id: 1,
-                    username: "Clara G",
+                    user: mockUsers[0],
                     amount: 4,
                     title: "Thé & biscuits"
                 },
                 {
                     id: 2,
-                    username: "Jeanne",
+                    user: mockUsers[1],
                     amount: 10,
                     title: "Cookies"
                 },
                 {
                     id: 3,
-                    username: "Julie",
+                    user: mockUsers[2],
                     amount: 15,
                     title: "Pizza"
                 }
@@ -135,10 +135,10 @@ describe('Account Calculator tests', () => {
             const accountCalculator = new AccountCalculator(mockExpenseRepository, mockUserRepository);
 
             // ACT
-            const balances: Map<String, Map<String, number>> = await accountCalculator.getAccountBalance();
-            const expectedExpenses: Map<String, Map<String, number>> = new Map<String, Map<String, number>>();
+            const balances: Map<User, Map<User, number>> = await accountCalculator.getAccountBalance();
+            const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
             mockUsers.forEach(user => {
-                expectedExpenses.set(user.username, new Map<String, number>());
+                expectedExpenses.set(user, new Map<User, number>());
             });
     
             // ASSERT
@@ -155,7 +155,7 @@ describe('Account Calculator tests', () => {
             mockUserRepository.getAllUsers.resolves(mockUsers);
             const mockExpense: Expense = {
                 id: 1,
-                username: "Clara",
+                user: mockUsers[0],
                 amount: 30,
                 title: "Thé & biscuits"
             };
@@ -165,14 +165,14 @@ describe('Account Calculator tests', () => {
 
             // ACT
             const balances = await accountCalculator.getAccountBalance();
-            const expectedExpenses: Map<String, Map<String, number>> = new Map<String, Map<String, number>>();
-            const defaultDebt: Map<String, number> = new Map<String, number>();
-            defaultDebt.set("Clara", 10);
+            const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
+            const defaultDebt: Map<User, number> = new Map<User, number>();
+            defaultDebt.set(mockUsers[0], 10);
 
             mockUsers.forEach((user, ind) => {
                 ind == 0 ?
-                    expectedExpenses.set(user.username, new Map<String, number>()) : 
-                    expectedExpenses.set(user.username, defaultDebt);
+                    expectedExpenses.set(user, new Map<User, number>()) : 
+                    expectedExpenses.set(user, defaultDebt);
             });
     
             // ASSERT
@@ -189,12 +189,12 @@ describe('Account Calculator tests', () => {
             mockUserRepository.getAllUsers.resolves(mockUsers);
             const mockExpenses: Expense[] = [{
                 id: 1,
-                username: "Clara",
+                user: mockUsers[0],
                 amount: 30,
                 title: "Thé & biscuits"
             }, {
                 id: 2,
-                username: "Clara",
+                user: mockUsers[0],
                 amount: 60,
                 title: "Jeu de switch Pokémon Diamant"
             }];
@@ -204,14 +204,14 @@ describe('Account Calculator tests', () => {
 
             // ACT
             const balances = await accountCalculator.getAccountBalance();
-            const expectedExpenses: Map<String, Map<String, number>> = new Map<String, Map<String, number>>();
-            const defaultDebt: Map<String, number> = new Map<String, number>();
-            defaultDebt.set("Clara", 30);
+            const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
+            const defaultDebt: Map<User, number> = new Map<User, number>();
+            defaultDebt.set(mockUsers[0], 30);
 
             mockUsers.forEach((user, ind) => {
                 ind == 0 ?
-                    expectedExpenses.set(user.username, new Map<String, number>()) : 
-                    expectedExpenses.set(user.username, defaultDebt);
+                    expectedExpenses.set(user, new Map<User, number>()) : 
+                    expectedExpenses.set(user, defaultDebt);
             });
     
             // ASSERT
@@ -228,27 +228,27 @@ describe('Account Calculator tests', () => {
             mockUserRepository.getAllUsers.resolves(mockUsers);
             const mockExpenses: Expense[] = [{
                 id: 1,
-                username: mockUsers[0].username,
+                user: mockUsers[0],
                 amount: 30,
                 title: "Thé & biscuits"
             }, {
                 id: 2,
-                username: mockUsers[0].username,
+                user: mockUsers[0],
                 amount: 60,
                 title: "Jeu de switch Pokémon Diamant"
             }, {
                 id: 3,
-                username: mockUsers[1].username,
+                user: mockUsers[1],
                 amount: 15,
                 title: "Crêpes"
             }, {
                 id: 4,
-                username: mockUsers[1].username,
+                user: mockUsers[1],
                 amount: 75,
                 title: "Meuble pour le salon"
             }, {
                 id: 5,
-                username: mockUsers[2].username,
+                user: mockUsers[2],
                 amount: 6,
                 title: "Rose"
             }];
@@ -258,18 +258,18 @@ describe('Account Calculator tests', () => {
 
             // ACT
             const balances = await accountCalculator.getAccountBalance();
-            const expectedExpenses: Map<String, Map<String, number>> = new Map<String, Map<String, number>>();
-            const user0Debt: Map<String, number> = new Map<String, number>();
+            const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
+            const user0Debt: Map<User, number> = new Map<User, number>();
 
-            const user1Debt: Map<String, number> = new Map<String, number>();
+            const user1Debt: Map<User, number> = new Map<User, number>();
 
-            const user2Debt: Map<String, number> = new Map<String, number>();
-            user2Debt.set(mockUsers[0].username, 28);
-            user2Debt.set(mockUsers[1].username, 28);
+            const user2Debt: Map<User, number> = new Map<User, number>();
+            user2Debt.set(mockUsers[0], 28);
+            user2Debt.set(mockUsers[1], 28);
 
-            expectedExpenses.set(mockUsers[0].username, user0Debt);
-            expectedExpenses.set(mockUsers[1].username, user1Debt);
-            expectedExpenses.set(mockUsers[2].username, user2Debt);
+            expectedExpenses.set(mockUsers[0], user0Debt);
+            expectedExpenses.set(mockUsers[1], user1Debt);
+            expectedExpenses.set(mockUsers[2], user2Debt);
     
             // ASSERT
             expect(areBalancesEqual(balances, expectedExpenses)).to.true;
@@ -285,7 +285,7 @@ describe('Account Calculator tests', () => {
             mockUserRepository.getAllUsers.resolves(mockUsers);
             const mockExpenses: Expense[] = [{
                 id: 1,
-                username: mockUsers[0].username,
+                user: mockUsers[0],
                 amount: 10,
                 title: "Thé & biscuits"
             }];
@@ -293,16 +293,16 @@ describe('Account Calculator tests', () => {
 
             const accountCalculator = new AccountCalculator(mockExpenseRepository, mockUserRepository);
 
-            const expectedExpenses: Map<String, Map<String, number>> = new Map<String, Map<String, number>>();
-            const user0Debt: Map<String, number> = new Map<String, number>();
-            const user1Debt: Map<String, number> = new Map<String, number>();
-            user1Debt.set(mockUsers[0].username, 3);
-            const user2Debt: Map<String, number> = new Map<String, number>();
-            user2Debt.set(mockUsers[0].username, 3);
+            const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
+            const user0Debt: Map<User, number> = new Map<User, number>();
+            const user1Debt: Map<User, number> = new Map<User, number>();
+            user1Debt.set(mockUsers[0], 3);
+            const user2Debt: Map<User, number> = new Map<User, number>();
+            user2Debt.set(mockUsers[0], 3);
 
-            expectedExpenses.set(mockUsers[0].username, user0Debt);
-            expectedExpenses.set(mockUsers[1].username, user1Debt);
-            expectedExpenses.set(mockUsers[2].username, user2Debt);
+            expectedExpenses.set(mockUsers[0], user0Debt);
+            expectedExpenses.set(mockUsers[1], user1Debt);
+            expectedExpenses.set(mockUsers[2], user2Debt);
 
             // ACT
             const balances = await accountCalculator.getAccountBalance();

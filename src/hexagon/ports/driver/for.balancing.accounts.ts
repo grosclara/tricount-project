@@ -1,4 +1,5 @@
 import Expense from "../../models/Expense";
+import User from "../../models/User";
 
 export interface IBalance {
     amount: number;
@@ -7,7 +8,7 @@ export interface IBalance {
 
 export default interface ForBalancingAccounts
 {
-	getAccountBalance(): Promise<Map<String, Map<String, number>>>;
+	getAccountBalance(): Promise<Map<User, Map<User, number>>>;
     // GetAccountBalanceByUser(userId): number ;
     getAllExpenses(): Promise<Expense[]>;
 }
