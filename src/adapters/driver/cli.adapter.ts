@@ -52,7 +52,33 @@ export default class CliAdapter {
 
     private addUser(): Promise<void> {
         return this.terminal.readInput('\nEnter a unique username: ')
-        .then(() => { Promise.resolve()})
+        .then((input) => {
+            return this.userRecorder.CreateUser(input);
+        })
+        .then((user) => {
+            return this.terminal.print(`User ${user.username} successfully added to the Tricount!`)
+        })
+        .then(() => {
+            return this.terminal.readInput('Do you want to add another user? [y/N] ')
+        })
+        .then((input) => {
+            if (input.toLowerCase() === 'y')
+                return this.addUser();
+            else {
+                return this.userRecorder.GetAllUsers()
+                .then((users) => {
+                    if (users.length <= 1) {
+                        return this.terminal.print('You must add at least two members in the Tricount!')
+                        // .then(() => { return this.addUser() })
+                       // return this.addUser();
+                    }
+                    // else {
+                    //     return Promise.resolve();
+                    // }
+                })
+            }
+            
+        })
     }
 
     private addExpense(): Promise<void> {
