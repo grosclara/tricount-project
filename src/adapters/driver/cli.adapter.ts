@@ -21,7 +21,7 @@ export default class CliAdapter {
         this.accountingBalancer = accountingBalancer;
     }
 
-    public start() {
+    public start() : Promise<void> {
         return this.terminal.print('Hello, I\'m the Tricount CLI :)\n')
         .then( () => { return this.userRecorder.GetAllUsers() })
         .then((users) => {
@@ -29,18 +29,25 @@ export default class CliAdapter {
                 return this.createTricount()
             }
             else {
-                return Promise.resolve("");
+                return this.run();
             }
         })
-        .then( () => { return this.run() })
     }
 
     private run(): Promise<void> {
         return this.terminal.print("Welcome to your Tricount!");
     }
 
-    private createTricount(): Promise<string> {
-        return this.terminal.readInput('\nDo you want to create a new Tricount? [y/N] ');
+    private createTricount(): Promise<void> {
+        return this.terminal.readInput('\nDo you want to create a new Tricount? [y/N] ')
+        .then((input) => {
+            if (input.toLowerCase() === 'y'){
+                return this.addUser();
+            }
+            else {
+                return this.terminal.print('ok bye!\n');
+            }
+        })
     }
 
     private addUser(): Promise<void> {
