@@ -10,7 +10,7 @@ chai.use(chaiAsPromised);
 
 import User from '../src/hexagon/models/User';
 import { UserRecorder } from '../src/hexagon/usecases/UserRecorder';
-import UserAlreadyExistsError from '../src/errors/UserAlreadyExistsError';
+import AlreadyExistingUserError from '../src/errors/AlreadyExistingUserError';
 
 describe('User Recorder', () => {
 	it('given an user Repository without any user, when adding a user with a username "Sophie" then it should add the user', async () => {
@@ -41,7 +41,7 @@ describe('User Recorder', () => {
 		const promise = userRecorder.CreateUser(username);
 	
 		// ASSERT
-		await expect(promise).to.be.rejectedWith(UserAlreadyExistsError, `User already exists error: ${username} already exists in database`);
+		await expect(promise).to.be.rejectedWith(AlreadyExistingUserError, `User already exists error: ${username} already exists in database`);
 		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
 		expect(mockUserRepository.createUser).to.not.have.been.called;
 	});
@@ -59,7 +59,7 @@ describe('User Recorder', () => {
 		const promise = userRecorder.CreateUser(usernameToAdd);
 	
 		// ASSERT
-		await expect(promise).to.be.rejectedWith(UserAlreadyExistsError, `User already exists error: ${usernameToAdd} already exists in database`);
+		await expect(promise).to.be.rejectedWith(AlreadyExistingUserError, `User already exists error: ${usernameToAdd} already exists in database`);
 		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
 		expect(mockUserRepository.createUser).to.not.have.been.called;
 	});

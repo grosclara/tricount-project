@@ -1,4 +1,4 @@
-import UserAlreadyExistsError from "../../errors/UserAlreadyExistsError";
+import AlreadyExistingUserError from "../../errors/AlreadyExistingUserError";
 import User from "../models/User";
 import ForStoringUsers from "../ports/driven/for.storing.users";
 import ForRecordingUsers from "../ports/driver/for.recording.users";
@@ -18,7 +18,7 @@ export class UserRecorder implements ForRecordingUsers {
         const users = await this.userRepository.getAllUsers();
         users.forEach((user) => {
             if (user.username.toLowerCase() === userToAdd.username.toLowerCase()){
-                throw new UserAlreadyExistsError(`User already exists error: ${username} already exists in database`);
+                throw new AlreadyExistingUserError(`User already exists error: ${username} already exists in database`, user);
             }
         })
         const createdUser = await this.userRepository.createUser(userToAdd);   
