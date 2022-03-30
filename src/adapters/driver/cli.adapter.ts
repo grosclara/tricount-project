@@ -2,7 +2,9 @@ import ForRecordingExpenses from "../../hexagon/ports/driver/for.recording.expen
 import ForBalancingAccounts from "../../hexagon/ports/driver/for.balancing.accounts";
 import ForRecordingUsers from "../../hexagon/ports/driver/for.recording.users";
 import Terminal from "./terminal-helper";
-import User from "../../hexagon/models/User";
+import AlreadyExistingUserError from "../../errors/AlreadyExistingUserError";
+import InvalidAmountError from "../../errors/InvalidAmountError";
+import UnknownUserError from "../../errors/UnknownUserError";
 
 export default class CliAdapter {
     private terminal: Terminal
@@ -21,31 +23,48 @@ export default class CliAdapter {
         this.accountingBalancer = accountingBalancer;
     }
 
-    public start() : Promise<void> {
+    public start() {
         return this.terminal.print('Hello, I\'m the Tricount CLI :)\n')
         .then( () => { return this.userRecorder.GetAllUsers() })
         .then((users) => {
             if (users.length === 0) {
                 return this.createTricount()
             }
-            else {
-                return this.run();
-            }
+            else { return true}
+        })
+        .then((tricountCreated) => {
+            if (tricountCreated)
+                return this.run()
         })
     }
 
     private run(): Promise<void> {
-        return this.terminal.print("Welcome to your Tricount!");
+        return this.terminal.print("Welcome to your Tricount!")
+        .then(() => {
+            return this.terminal.readInput('Do you want to:\n1) Record a new expense?\n2) Get account balance?\n3) exit?\n')
+        })
+        .then((input) => {
+            if (input === '1')
+                return this.addExpense();
+            else if (input === '2')
+                return this.getBalance();
+            if (input === '3')
+                return this.terminal.print('ok bye!\n')
+            else {
+                return this.terminal.print('You must select one of the options')
+                .then(() => { return this.run() })
+            }
+        })
     }
 
-    private createTricount(): Promise<void> {
+    private createTricount(): Promise<boolean> {
         return this.terminal.readInput('\nDo you want to create a new Tricount? [y/N] ')
         .then((input) => {
             if (input.toLowerCase() === 'y'){
-                return this.addUser();
+                return this.addUser().then(() => { return true} );
             }
             else {
-                return this.terminal.print('ok bye!\n');
+                return this.terminal.print('ok bye!\n').then(() => { return false} );
             }
         })
     }
@@ -69,23 +88,82 @@ export default class CliAdapter {
                 .then((users) => {
                     if (users.length <= 1) {
                         return this.terminal.print('You must add at least two members in the Tricount!')
-                        // .then(() => { return this.addUser() })
-                       // return this.addUser();
+                        .then(() => {
+                            return this.addUser()
+                        })
                     }
-                    // else {
-                    //     return Promise.resolve();
-                    // }
+                    else {
+                        let userString = ""
+                        users.forEach(user => userString = userString + user.username + "\n");
+                        return this.terminal.print(`Here are the members of you Tricount:\n${userString}\n`)
+                    }
                 })
             }
-            
+        })
+        .catch((err) => {
+            if (err instanceof AlreadyExistingUserError) {
+                return this.terminal.print(`User ${err.user.username} is already a member!`)
+                .then(() => {
+                    this.addUser()
+                })
+            }
         })
     }
 
     private addExpense(): Promise<void> {
-        throw new Error("Method not implemented");
+        var username: string, amount: number, title: string;
+        return this.terminal.print(`\nLet's record a new expense`)
+        .then(() => { return this.userRecorder.GetAllUsers() })
+        .then((users => {
+            let userString = ""
+            users.forEach(user => userString = userString + user.username + "\n");
+            return this.terminal.readInput(`-> Enter a username in the member list:\n${userString}`)
+        }))
+        .then((userInput) => {
+            username = userInput;
+            return this.terminal.readInput('-> Enter an amount (€): ')
+        })
+        .then((amountInput) => {
+            amount = +amountInput;
+            return this.terminal.readInput('-> Enter enter a description: ')
+        })
+        .then((titleInput) => {
+            title = titleInput;
+            return this.expenseRecorder.RecordExpense(title, amount, username);
+        })
+        .then((expense) => {
+            return this.terminal.print(`Expense successfully recorded: ${expense.username} paid ${expense.amount} for ${expense.title}!\n`)
+        })
+        .catch((err) => {
+            if (err instanceof UnknownUserError) {
+                return this.terminal.print(`User ${username} does not exist!`)
+            }
+            if (err instanceof InvalidAmountError) {
+                return this.terminal.print(`Amount ${username} should be a postitive integer!`)
+            }
+        })
+        .finally(() => {
+            return this.run();
+        })
     }
 
     private getBalance() : Promise<void> {
-        throw new Error("Method not implemented")
+        return this.terminal.print('\nAccount balance:')
+        .then(() => {
+            return this.accountingBalancer.GetAccountBalance()
+        })
+        .then((accountMap) => {
+            let accountString = '';
+            accountMap.forEach(function(debtorMap, creditor) {
+                accountString += `\nCreditor: ${creditor.username}\n`
+                debtorMap.forEach(function(amount, debtor) {
+                    accountString += `\tDebtor: ${debtor.username} | Amount: ${amount}\n`
+                })
+            })
+            return this.terminal.print(accountString);
+        })
+        .finally(() => {
+            return this.run();
+        })
     }
 }
