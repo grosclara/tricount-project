@@ -28,7 +28,7 @@ describe('CliAdapter', () => {
             // ARRANGE
             const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub().resolves() };
             const mockExpenseRecorder = { RecordExpense: sinon.stub() }
-            const mockUserRecorder = { GetAllUsers: sinon.stub(), CreateUser: sinon.stub() }
+            const mockUserRecorder = { GetAllUsers: sinon.stub().resolves([]), CreateUser: sinon.stub() }
             const mockAccountCalculator = { GetAccountBalance: sinon.stub() }
 
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
@@ -37,13 +37,13 @@ describe('CliAdapter', () => {
     		await cli.start();
 
             // ASSERT
-            expect(mockTerminal.print).to.be.calledOnceWith('Hello, I\'m the Tricount CLI :)\n');
+            expect(mockTerminal.print).to.be.calledWith('Hello, I\'m the Tricount CLI :)\n');
         });
         it('GIVEN a new CLI with no previous member, WHEN we start the CLI, THEN it should ask for creating a new Tricount', async () => {
             // ARRANGE
             const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub().resolves() };
             const mockExpenseRecorder = { RecordExpense: sinon.stub() }
-            const mockUserRecorder = { GetAllUsers: sinon.stub(), CreateUser: sinon.stub() }
+            const mockUserRecorder = { GetAllUsers: sinon.stub().resolves([]), CreateUser: sinon.stub() }
             const mockAccountCalculator = { GetAccountBalance: sinon.stub() }
 
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
@@ -54,7 +54,25 @@ describe('CliAdapter', () => {
             // ASSERT
             expect(mockTerminal.readInput).to.be.calledWith('\nDo you want to create a new Tricount? [y/N] ');
         });
-        it.skip('GIVEN a Tricount with members, WHEN we start the CLI, THEN it should run the app without asking for the Tricount creation');
+        it('GIVEN a Tricount with members, WHEN we start the CLI, THEN it should run the app without asking for the Tricount creation', async () => {
+            // ARRANGE
+            const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub().resolves() };
+            const mockExpenseRecorder = { RecordExpense: sinon.stub() }
+            const mockUserRecorder = { GetAllUsers: sinon.stub(), CreateUser: sinon.stub() }
+            const mockAccountCalculator = { GetAccountBalance: sinon.stub() }
+
+            mockUserRecorder.GetAllUsers.resolves([new User("Clara"), new User("Paul")]);
+
+            const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
+
+            // ACT
+            await cli.start();
+
+            // ASSERT
+            expect(mockTerminal.readInput).to.be.not.calledWith('\nDo you want to create a new Tricount? [y/N] ');
+            expect(mockTerminal.print).to.be.calledWith('Welcome to your Tricount!');
+
+        });
 
     }),
     describe('Create a new Tricount', () => {

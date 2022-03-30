@@ -2,6 +2,7 @@ import ForRecordingExpenses from "../../hexagon/ports/driver/for.recording.expen
 import ForBalancingAccounts from "../../hexagon/ports/driver/for.balancing.accounts";
 import ForRecordingUsers from "../../hexagon/ports/driver/for.recording.users";
 import Terminal from "./terminal-helper";
+import User from "../../hexagon/models/User";
 
 export default class CliAdapter {
     private terminal: Terminal
@@ -20,13 +21,22 @@ export default class CliAdapter {
         this.accountingBalancer = accountingBalancer;
     }
 
-    public start() : Promise<string> {
+    public start() {
         return this.terminal.print('Hello, I\'m the Tricount CLI :)\n')
-        .then(() => { return this.createTricount() })
+        .then( () => { return this.userRecorder.GetAllUsers() })
+        .then((users) => {
+            if (users.length === 0) {
+                return this.createTricount()
+            }
+            else {
+                return Promise.resolve("");
+            }
+        })
+        .then( () => { return this.run() })
     }
 
     private run(): Promise<void> {
-        throw new Error("Method not implemented");
+        return this.terminal.print("Welcome to your Tricount!");
     }
 
     private createTricount(): Promise<string> {
