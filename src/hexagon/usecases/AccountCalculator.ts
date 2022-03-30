@@ -1,7 +1,7 @@
-import User from "../models/User";
-import ForStoringExpenses from "../ports/driven/for.storing.expenses";
-import ForStoringUsers from "../ports/driven/for.storing.users";
-import ForBalancingAccounts from "../ports/driver/for.balancing.accounts";
+import { User } from "../models/User";
+import { ForStoringExpenses } from "../ports/driven/for.storing.expenses";
+import { ForStoringUsers } from "../ports/driven/for.storing.users";
+import { ForBalancingAccounts } from "../ports/driver/for.balancing.accounts";
 
 export class AccountCalculator implements ForBalancingAccounts {
     
@@ -16,7 +16,7 @@ export class AccountCalculator implements ForBalancingAccounts {
         this.userRepository = userRepository;
     }
 
-    GetAccountBalance(): Map<User, Map<User, number>> {
+    getAccountBalance(): Map<User, Map<User, number>> {
         throw new Error("Method not implemented.");
     }
 }

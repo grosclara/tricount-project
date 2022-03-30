@@ -8,11 +8,11 @@ const expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
-import ExpenseRecorder from '../src/hexagon/usecases/ExpenseRecorder';
-import InvalidAmountError from '../src/errors/InvalidAmountError';
-import User from '../src/hexagon/models/User';
-import UnknownUserError from '../src/errors/UnknownUserError';
-import Expense from '../src/hexagon/models/Expense';
+import { ExpenseRecorder } from '../src/hexagon/usecases/ExpenseRecorder';
+import { InvalidAmountError } from '../src/errors/InvalidAmountError';
+import { User } from '../src/hexagon/models/User';
+import { UnknownUserError } from '../src/errors/UnknownUserError';
+import { Expense } from '../src/hexagon/models/Expense';
 
 describe('ExpenseRecorder', () => {
 	it('GIVEN a new expense recorder, WHEN adding an expense with a negative amount, THEN it should fail with an invalid amount error', async () => {
@@ -26,7 +26,7 @@ describe('ExpenseRecorder', () => {
 		const expenseRecorder = new ExpenseRecorder(mockExpenseRepository, mockUserRepository)
 	
 		// ACT
-		const promise = expenseRecorder.RecordExpense(title, amount, username);
+		const promise = expenseRecorder.recordExpense(title, amount, username);
 
 		// ASSERT
 		await expect(promise).to.be.rejectedWith(InvalidAmountError, `Invalid amount error: ${amount} should be a positive integer`);
@@ -46,7 +46,7 @@ describe('ExpenseRecorder', () => {
 		const expenseRecorder = new ExpenseRecorder(mockExpenseRepository, mockUserRepository)
 
 		// ACT
-		const promise = expenseRecorder.RecordExpense(title, amount, username);
+		const promise = expenseRecorder.recordExpense(title, amount, username);
 
 		// ASSERT
 		await expect(promise).to.be.rejectedWith(UnknownUserError, `Unknown user error: ${username} does not exist yet`);
@@ -68,7 +68,7 @@ describe('ExpenseRecorder', () => {
 		const expenseRecorder = new ExpenseRecorder(mockExpenseRepository, mockUserRepository)
 
 		// ACT
-		let promise = expenseRecorder.RecordExpense(title, amount, username);
+		let promise = expenseRecorder.recordExpense(title, amount, username);
 		let result = await promise;
 
 		// ASSERT

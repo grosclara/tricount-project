@@ -1,8 +1,7 @@
+import { User } from "../../hexagon/models/User"
+import { ForStoringUsers } from "../../hexagon/ports/driven/for.storing.users";
 
-import User from "../../hexagon/models/User"
-import UserRepository from "../../hexagon/ports/driven/for.storing.users";
-
-export class UserInMemoryAdapter implements UserRepository {
+export class UserInMemoryAdapter implements ForStoringUsers {
 
 	private users: User[]
 	constructor(users: User[]) {

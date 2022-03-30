@@ -1,4 +1,4 @@
-export default class InvalidAmountError extends Error {
+export class InvalidAmountError extends Error {
     constructor(msg: string) {
         super(msg);
         // Set the prototype explicitly.

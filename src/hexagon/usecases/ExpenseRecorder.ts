@@ -1,11 +1,11 @@
-import InvalidAmountError from "../../errors/InvalidAmountError";
-import UnknownUserError from "../../errors/UnknownUserError";
-import Expense from "../models/Expense";
-import ForStoringExpenses from "../ports/driven/for.storing.expenses";
-import ForStoringUsers from "../ports/driven/for.storing.users";
-import ForRecordingExpenses from "../ports/driver/for.recording.expenses";
+import { InvalidAmountError } from "../../errors/InvalidAmountError";
+import { UnknownUserError } from "../../errors/UnknownUserError";
+import { Expense } from "../models/Expense";
+import { ForStoringExpenses } from "../ports/driven/for.storing.expenses";
+import { ForStoringUsers } from "../ports/driven/for.storing.users";
+import { ForRecordingExpenses } from "../ports/driver/for.recording.expenses";
 
-export default class ExpenseRecorder implements ForRecordingExpenses {
+export class ExpenseRecorder implements ForRecordingExpenses {
     
     expenseRepository: ForStoringExpenses
     userRepository: ForStoringUsers
@@ -18,7 +18,7 @@ export default class ExpenseRecorder implements ForRecordingExpenses {
         this.userRepository = userRepository;
     }
     
-    async RecordExpense(title: string, amount: number, username: string): Promise<Expense> {
+    async recordExpense(title: string, amount: number, username: string): Promise<Expense> {
 
         if (amount < 0)
             throw new InvalidAmountError(`Invalid amount error: ${amount} should be a positive integer`);

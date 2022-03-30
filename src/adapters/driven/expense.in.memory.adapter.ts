@@ -1,5 +1,5 @@
-import Expense from "../../hexagon/models/Expense"
-import ForStoringExpenses from "../../hexagon/ports/driven/for.storing.expenses";
+import { Expense } from "../../hexagon/models/Expense"
+import { ForStoringExpenses } from "../../hexagon/ports/driven/for.storing.expenses";
 
 export class ExpenseInMemoryAdapter implements ForStoringExpenses {
 
