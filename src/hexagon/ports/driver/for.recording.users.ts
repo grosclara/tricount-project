@@ -2,6 +2,6 @@ import { User } from "../../models/User";
 
 export interface ForRecordingUsers     
 {
-	createUser( username: string ): User ;
-    getAllUsers(): User[] ;
+	createUser( username: string ): Promise<User> ;
+    getAllUsers(): Promise<User[]> ;
 }

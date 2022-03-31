@@ -1,11 +1,13 @@
+import { User } from "./User";
+
 export class Expense {
     title: string;
     amount: number;
-    username: string;
+    user: User;
 
-    constructor(title: string, amount: number, username: string){
+    constructor(title: string, amount: number, user: User){
         this.title = title;
         this.amount = amount;
-        this.username = username;
+        this.user = user;
     }
 }

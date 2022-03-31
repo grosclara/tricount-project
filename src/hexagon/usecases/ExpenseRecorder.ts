@@ -1,6 +1,7 @@
 import { InvalidAmountError } from "../../errors/InvalidAmountError";
 import { UnknownUserError } from "../../errors/UnknownUserError";
 import { Expense } from "../models/Expense";
+import { User } from "../models/User";
 import { ForStoringExpenses } from "../ports/driven/for.storing.expenses";
 import { ForStoringUsers } from "../ports/driven/for.storing.users";
 import { ForRecordingExpenses } from "../ports/driver/for.recording.expenses";
@@ -27,7 +28,7 @@ export class ExpenseRecorder implements ForRecordingExpenses {
         if (!users.some(user => user.username === username))
             throw new UnknownUserError(`Unknown user error: ${username} does not exist yet`);
 
-        let expenseToAdd = new Expense(title, amount, username);
+        let expenseToAdd = new Expense(title, amount, new User(username));
         const createdExpense = await this.expenseRepository.createExpense(expenseToAdd);   
         
         return createdExpense; 

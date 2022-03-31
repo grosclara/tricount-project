@@ -60,7 +60,7 @@ describe('ExpenseRecorder', () => {
 		let title = "Valid expense"
 
 		const user = new User(username)
-		const expense = new Expense(title, amount, username)
+		const expense = new Expense(title, amount, user)
 
 		const mockExpenseRepository = { getAllExpenses: sinon.stub(), createExpense: sinon.stub().resolves(expense) }
 		const mockUserRepository = { getAllUsers: sinon.stub().resolves([user]), createUser: sinon.stub() }

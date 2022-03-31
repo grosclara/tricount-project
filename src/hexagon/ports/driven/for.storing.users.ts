@@ -3,5 +3,5 @@ import { User } from "../../models/User";
 export interface ForStoringUsers 
 {
 	getAllUsers(): Promise<User[]>;
-	createUser(user: User): Promise<void>;
+	createUser(user: User): Promise<User>;
 }
