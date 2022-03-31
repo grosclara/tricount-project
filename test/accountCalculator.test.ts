@@ -69,9 +69,6 @@ describe('Account Calculator tests', () => {
             // ASSERT
             expect(expenses).to.be.deep.equal(expectedExpenses)
             expect(mockExpenseRepository.getAllExpenses).to.have.been.calledOnce;
-
-            // expect( async () => accountCalculator.getAllExpenses()).to.throw(Error, 'Invalid amount error');
-            // expect(mockExpenseRepository.createExpense).to.have.not.been.called;
         });
 
         it('given a tricount with some expenses when get all the expenses then it should return an array containing the expenses', async () => {
