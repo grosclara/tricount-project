@@ -26,7 +26,7 @@ export class ExpenseRecorder implements ForRecordingExpenses {
 
         const users = await this.userRepository.getAllUsers();
         if (!users.some(user => user.username === username))
-            throw new UnknownUserError(`Unknown user error: ${username} does not exist yet`);
+            throw new UnknownUserError(`Unknown user error: ${username} does not exist`);
 
         let expenseToAdd = new Expense(title, amount, new User(username));
         const createdExpense = await this.expenseRepository.createExpense(expenseToAdd);   

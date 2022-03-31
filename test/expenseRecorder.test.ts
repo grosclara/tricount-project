@@ -49,7 +49,7 @@ describe('ExpenseRecorder', () => {
 		const promise = expenseRecorder.recordExpense(title, amount, username);
 
 		// ASSERT
-		await expect(promise).to.be.rejectedWith(UnknownUserError, `Unknown user error: ${username} does not exist yet`);
+		await expect(promise).to.be.rejectedWith(UnknownUserError, `Unknown user error: ${username} does not exist`);
 		expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
 		expect(mockExpenseRepository.createExpense).to.have.not.been.called;
 	});
