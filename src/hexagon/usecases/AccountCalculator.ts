@@ -28,42 +28,57 @@ export class AccountCalculator implements ForBalancingAccounts {
             users.forEach(user => {
                 balances.set(user, new Map<User, number>());
             });
+            // this.printBalances(balances)
             return balances;
         }
-        const totalAmountPaidByUser = new Map<User, number>();
+        const totalAmountPaidByUser = new Map<String, number>();
         const rawDebts = new Map<User, Map<User, number>>();
         users.forEach(user => {
-            totalAmountPaidByUser.set(user, 0);
+            totalAmountPaidByUser.set(user.username, 0);
             rawDebts.set(user, new Map<User, number>());
         });
+        // this.printTotalAmount(totalAmountPaidByUser);
 
         // sum of all expenses spent by each person
         expenses.forEach(expense => {
             const { user, amount } = expense;
-            const currentAmountPaidByUser: number | undefined = totalAmountPaidByUser.get(user)
+            const currentAmountPaidByUser: number | undefined = totalAmountPaidByUser.get(user.username)
             if (currentAmountPaidByUser == undefined) return;
-            totalAmountPaidByUser.set(user, currentAmountPaidByUser + amount);
+            totalAmountPaidByUser.set(user.username, currentAmountPaidByUser + amount);
+            // console.log(`Total amount payé updaté par ${user.username} : ${totalAmountPaidByUser.get(user.username)}`);
         });
+        // this.printTotalAmount(totalAmountPaidByUser);
 
         // share these expenses to get a first ugly version of balances
         const userNb = users.length;
+        // console.log(`On a ${userNb} users`);
         users.forEach(userWhoPaid => {
-            const totalByUser = totalAmountPaidByUser.get(userWhoPaid);
+            const totalByUser = totalAmountPaidByUser.get(userWhoPaid.username);
+            // console.log(`User ${userWhoPaid.username} a payé ${totalByUser}€`);
             if (!totalByUser) return;
             const amountToShare = Math.floor(totalByUser/userNb);
             for (var user of users) {
+                // console.log(`User ${user.username} est bien différent de ${userWhoPaid.username}: ${user.username != userWhoPaid.username}`);
                 if (user.username != userWhoPaid.username) {
-                    const userDebts: Map<User, number> | undefined = rawDebts.get(user);
-                    if (userDebts == undefined) continue;
-                    const currentUserDebtToUserWhoPaid = userDebts.get(userWhoPaid);
-                    const updatedDebtToUserWhoPaid: number = (currentUserDebtToUserWhoPaid == undefined) ? amountToShare : currentUserDebtToUserWhoPaid + amountToShare;
+                    // console.log(`${user.username} a une dette envers ${userWhoPaid.username} de ${amountToShare}`);
+                    var userDebts: Map<User, number> | undefined = rawDebts.get(user);
+                    var updatedDebtToUserWhoPaid: number;
+                    if (userDebts == undefined) {
+                        userDebts = new Map<User, number>();
+                        updatedDebtToUserWhoPaid = amountToShare;
+                    } else {
+                        const currentUserDebtToUserWhoPaid = userDebts.get(userWhoPaid);
+                        updatedDebtToUserWhoPaid = (currentUserDebtToUserWhoPaid == undefined) ? amountToShare : currentUserDebtToUserWhoPaid + amountToShare;
+                    }
                     userDebts.set(
                         userWhoPaid,
                         updatedDebtToUserWhoPaid
                     );
+                    // console.log(`${user.username}  - dette updatée envers ${userWhoPaid.username} : ${userDebts.get(userWhoPaid)}`);
                 }
             }
         });
+        // this.printBalances(rawDebts);
 
         // first rearrange the expenses
         // on prend chaque personne, on parcourt la liste de ses dettes
@@ -96,7 +111,7 @@ export class AccountCalculator implements ForBalancingAccounts {
                 }
             }
         });
-
+        // this.printBalances(rawDebts);
         return rawDebts;
 
         // Proposition pour un algo plus poussé
@@ -107,5 +122,25 @@ export class AccountCalculator implements ForBalancingAccounts {
 
     async getAllExpenses(): Promise<Expense[]> {
         return this.expenseRepository.getAllExpenses();
+    }
+
+    printBalances(balances: Map<User, Map<User, number>>): void {
+        console.log('on print les raw debts');
+        for (var [user, debts] of balances) {
+            console.log('Dettes de ' + user.username);
+            for (var [lender, debtAmount] of debts) {
+                console.log(`Créancier : ${lender.username}, amount : ${debtAmount}`);
+            }
+            console.log('');
+        }
+    }
+
+    printTotalAmount(totalAmount: Map<String, number>): void {
+        console.log('');
+        console.log('On print le total amount par personne');
+        for (var [username, amount] of totalAmount) {
+            console.log(`Personne qui a payé : ${username}, amount : ${amount}`);
+        }
+        console.log('');
     }
 }
