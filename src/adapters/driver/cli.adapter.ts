@@ -70,7 +70,7 @@ export class CliAdapter {
     }
 
     private askForUserList(): Promise<void> {
-        return this.terminal.readInput('Do you want to add another user? [y/N] ')
+        return this.terminal.readInput('Do you want to add a user? [y/N] ')
         .then((input) => {
             if (input.toLowerCase() === 'y')
                 return this.addUser();
