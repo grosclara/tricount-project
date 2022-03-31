@@ -1,8 +1,8 @@
-import User from "../../models/User";
+import { User } from "../../models/User";
 
-export default interface ForBalancingAccounts     
+export interface ForBalancingAccounts     
 {
-	GetAccountBalance(): Map<User, Map<User, number>> ;
+	getAccountBalance(): Map<User, Map<User, number>> ;
     // GetAccountBalanceByUser(userId): number ;
     // GelAllExpenses()
 }

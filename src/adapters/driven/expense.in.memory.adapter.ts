@@ -1,5 +1,5 @@
-import Expense from "../../hexagon/models/Expense"
-import ForStoringExpenses from "../../hexagon/ports/driven/for.storing.expenses";
+import { Expense } from "../../hexagon/models/Expense"
+import { ForStoringExpenses } from "../../hexagon/ports/driven/for.storing.expenses";
 
 export class ExpenseInMemoryAdapter implements ForStoringExpenses {
 
@@ -11,8 +11,8 @@ export class ExpenseInMemoryAdapter implements ForStoringExpenses {
 	getAllExpenses(): Promise<Expense[]> {
 		return Promise.resolve(this.expenses);
 	}
-	createExpense(expense: Expense): Promise<void> {
+	createExpense(expense: Expense): Promise<Expense> {
 		this.expenses.push(expense);
-		return Promise.resolve();
+		return Promise.resolve(expense);
 	}
 }

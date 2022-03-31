@@ -1,4 +1,4 @@
-export default class User {
+export class User {
     username: string;
 
     constructor(username: string){

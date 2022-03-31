@@ -1,7 +1,7 @@
-import User from "../../models/User";
+import { User } from "../../models/User";
 
-export default interface ForRecordingUsers     
+export interface ForRecordingUsers     
 {
-	CreateUser( username: string ): User ;
-    GetAllUsers(): User[] ;
+	createUser( username: string ): User ;
+    getAllUsers(): User[] ;
 }

@@ -1,6 +1,6 @@
-import User from "../models/User";
-import ForStoringUsers from "../ports/driven/for.storing.users";
-import ForRecordingUsers from "../ports/driver/for.recording.users";
+import { User } from "../models/User";
+import { ForStoringUsers } from "../ports/driven/for.storing.users";
+import { ForRecordingUsers } from "../ports/driver/for.recording.users";
 
 export class UserRecorder implements ForRecordingUsers {
     
@@ -12,10 +12,10 @@ export class UserRecorder implements ForRecordingUsers {
         this.userRepository = userRepository;
     }
 
-    CreateUser(username: string): User {
+    createUser(username: string): User {
         throw new Error("Method not implemented.");
     }
-    GetAllUsers(): User[] {
+    getAllUsers(): User[] {
         throw new Error("Method not implemented.");
     }
 }

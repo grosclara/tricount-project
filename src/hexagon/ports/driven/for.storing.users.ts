@@ -1,8 +1,7 @@
-import User from "../../models/User";
+import { User } from "../../models/User";
 
-export default interface ForStoringUsers 
+export interface ForStoringUsers 
 {
 	getAllUsers(): Promise<User[]>;
 	createUser(user: User): Promise<void>;
 }
-

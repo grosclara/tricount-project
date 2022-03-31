@@ -1,4 +1,4 @@
-export default class Expense {
+export class Expense {
     title: string;
     amount: number;
     username: string;

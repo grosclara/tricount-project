@@ -1,7 +1,6 @@
-import Expense from "../../models/Expense";
+import { Expense } from "../../models/Expense";
 
-export default interface ForRecordingExpenses     
+export interface ForRecordingExpenses     
 {
-	RecordExpense( expense: Expense ): void ;
-    // EditExpense(expenseId): void ;
+    recordExpense( title: string, amount: number, username: string ) : Promise<Expense> ;
 }
