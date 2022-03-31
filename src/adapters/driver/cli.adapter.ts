@@ -161,9 +161,9 @@ export class CliAdapter {
         .then((accountMap) => {
             let accountString = '';
             accountMap.forEach(function(debtorMap, creditor) {
-                accountString += `Creditor: ${creditor.username}\n`
+                accountString += `\n${creditor.username}'s debts\n`
                 debtorMap.forEach(function(amount, debtor) {
-                    accountString += `\tDebtor: ${debtor.username} | Amount: ${amount}\n`
+                    accountString += `\t- debt of ${amount}€ to ${debtor.username}\n`
                 })
             })
             return this.terminal.print(accountString);
