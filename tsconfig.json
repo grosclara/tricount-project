@@ -5,4 +5,8 @@
     },
     "include": ["src"],
     "exclude": ["node_modules"]
+<<<<<<< HEAD
   }
+=======
+  }
+>>>>>>> d65ffb1 (Pour run l'app)
