@@ -272,6 +272,36 @@ describe('CliAdapter', () => {
         });
     }),
     describe('Get balance', () => {
+        it("[happy path] GIVEN an expense repo empty, WHEN querying balance account, THEN it should show the list of users without debts", async () => {
+            // ARRANGE
+            const user0 = new User("Clara");
+            const user1 = new User('Paul');
+
+            const expectedBalances: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
+            const user0Debt: Map<User, number> = new Map<User, number>();
+            const user1Debt: Map<User, number> = new Map<User, number>();
+
+            expectedBalances.set(user0, user0Debt);
+            expectedBalances.set(user1, user1Debt);
+            
+            const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub() };
+            const mockExpenseRecorder = { recordExpense: sinon.stub() }
+            const mockUserRecorder = { getAllUsers: sinon.stub().resolves([user0, user1]), createUser: sinon.stub() }
+            const mockAccountCalculator = { getAccountBalance: sinon.stub().resolves(expectedBalances), getAllExpenses: sinon.stub() }
+
+            mockTerminal.readInput.onCall(0).resolves('3'); // get balance 
+            mockTerminal.readInput.onCall(1).resolves('4'); // exit   
+            
+            const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
+            
+            // ACT
+            await cli.start();
+
+            // ASSERT
+            expect(mockTerminal.print).to.have.been.calledWith(
+                "\nClara has no debt !\n\nPaul has no debt !\n"
+            );
+        });
         it("[happy path] GIVEN an expense repo not empty, WHEN querying balance account, THEN it should show the list of debtors & creditors", async () => {
             // ARRANGE
             const user0 = new User("Clara");
