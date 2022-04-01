@@ -58,28 +58,19 @@ export class CliAdapter {
     }
 
     private createTricount(): Promise<boolean> {
-        return this.terminal.readInput('\nDo you want to create a new Tricount? [y/N] ')
+        return this.terminal.readInput('Do you want to create a new Tricount? [y/N] ')
         .then((input) => {
             if (input.toLowerCase() === 'y'){
-                return this.addUser().then(() => { return true} );
+                return this.askForUserList().then(() => { return true} );
             }
             else {
-                return this.terminal.print('ok bye!\n').then(() => { return false} );
+                return this.terminal.print('ok bye!').then(() => { return false} );
             }
         })
     }
 
-    private addUser(): Promise<void> {
-        return this.terminal.readInput('\nEnter a unique username: ')
-        .then((input) => {
-            return this.userRecorder.createUser(input);
-        })
-        .then((user) => {
-            return this.terminal.print(`User ${user.username} successfully added to the Tricount!`)
-        })
-        .then(() => {
-            return this.terminal.readInput('Do you want to add another user? [y/N] ')
-        })
+    private askForUserList(): Promise<void> {
+        return this.terminal.readInput('Do you want to add a user? [y/N] ')
         .then((input) => {
             if (input.toLowerCase() === 'y')
                 return this.addUser();
@@ -95,16 +86,29 @@ export class CliAdapter {
                     else {
                         let userString = ""
                         users.forEach(user => userString = userString + user.username + "\n");
-                        return this.terminal.print(`Here are the members of you Tricount:\n${userString}\n`)
+                        return this.terminal.print(`Here are the members of you Tricount:\n${userString}`)
                     }
                 })
             }
+        })
+    }
+
+    private addUser(): Promise<void> {
+        return this.terminal.readInput('\nEnter a unique username: ')
+        .then((input) => {
+            return this.userRecorder.createUser(input);
+        })
+        .then((user) => {
+            return this.terminal.print(`User ${user.username} successfully added to the Tricount!\n`)
+        })
+        .then(() => {
+            return this.askForUserList();
         })
         .catch((err) => {
             if (err instanceof AlreadyExistingUserError) {
                 return this.terminal.print(`User ${err.user.username} is already a member!`)
                 .then(() => {
-                    this.addUser()
+                    return this.askForUserList()
                 })
             }
         })
@@ -125,6 +129,8 @@ export class CliAdapter {
         })
         .then((amountInput) => {
             amount = +amountInput;
+            if (isNaN(amount))
+                throw new InvalidAmountError(`Invalid amount error: ${amount} should be a positive integer`);
             return this.terminal.readInput('-> Enter enter a description: ')
         })
         .then((titleInput) => {
@@ -136,10 +142,10 @@ export class CliAdapter {
         })
         .catch((err) => {
             if (err instanceof UnknownUserError) {
-                return this.terminal.print(`User ${username} does not exist!`)
+                return this.terminal.print(err.message + '\n')
             }
             if (err instanceof InvalidAmountError) {
-                return this.terminal.print(`Amount ${username} should be a postitive integer!`)
+                return this.terminal.print(err.message + '\n')
             }
         })
         .finally(() => {
@@ -155,7 +161,7 @@ export class CliAdapter {
         .then((accountMap) => {
             let accountString = '';
             accountMap.forEach(function(debtorMap, creditor) {
-                accountString += `\nCreditor: ${creditor.username}\n`
+                accountString += `Creditor: ${creditor.username}\n`
                 debtorMap.forEach(function(amount, debtor) {
                     accountString += `\tDebtor: ${debtor.username} | Amount: ${amount}\n`
                 })
