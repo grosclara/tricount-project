@@ -100,9 +100,9 @@ export class AccountCalculator implements ForBalancingAccounts {
 
                     if (lenderDebtAmountMinusUserDebtAmount > 0) {
                         userDebts.delete(lenderName);
-                        lenderDebts.set(user, lenderDebtAmountToUser - debtAmount);
+                        lenderDebts.set(user, lenderDebtAmountMinusUserDebtAmount);
                     } else if (lenderDebtAmountMinusUserDebtAmount < 0) {
-                        userDebts.set(lenderName, lenderDebtAmountToUser - debtAmount);
+                        userDebts.set(lenderName, -lenderDebtAmountMinusUserDebtAmount);
                         lenderDebts.delete(user);
                     } else {
                         userDebts.delete(lenderName);
