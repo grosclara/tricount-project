@@ -268,7 +268,8 @@ describe('Account Calculator tests', () => {
             expect(mockExpenseRepository.getAllExpenses).to.have.been.calledOnce;
         });
 
-        it('given a tricount with 1 expense of 10€ and 3 users when compute the balances then it should return an balanced array', async () => {
+        it('given a tricount with 1 expense of 10€ and 3 users when compute the balances then it should \
+        return an balanced array and the user who paid should pay more to balance the tricount', async () => {
             // ARRANGE
             const mockExpenseRepository = { getAllExpenses: sinon.stub(), createExpense: sinon.stub() };
             const mockUserRepository = { getAllUsers: sinon.stub(), createUser: sinon.stub() };
@@ -287,10 +288,56 @@ describe('Account Calculator tests', () => {
 
             const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
             const user0Debt: Map<User, number> = new Map<User, number>();
+            // user0 should pay 4€, user1 and user2 both pay 3€
             const user1Debt: Map<User, number> = new Map<User, number>();
             user1Debt.set(mockUsers[0], 3);
             const user2Debt: Map<User, number> = new Map<User, number>();
             user2Debt.set(mockUsers[0], 3);
+
+            expectedExpenses.set(mockUsers[0], user0Debt);
+            expectedExpenses.set(mockUsers[1], user1Debt);
+            expectedExpenses.set(mockUsers[2], user2Debt);
+
+            // ACT
+            const balances = await accountCalculator.getAccountBalance();
+    
+            // ASSERT
+            expect(areBalancesEqual(balances, expectedExpenses)).to.true;
+            expect(mockUserRepository.getAllUsers).to.have.been.calledOnce;
+            expect(mockExpenseRepository.getAllExpenses).to.have.been.calledOnce;
+        })
+
+        it('given a tricount with 2 expenses and 3 users when compute the balances then it should \
+        return an balanced array where all the amount are positive', async () => {
+            // ARRANGE
+            const mockExpenseRepository = { getAllExpenses: sinon.stub(), createExpense: sinon.stub() };
+            const mockUserRepository = { getAllUsers: sinon.stub(), createUser: sinon.stub() };
+
+            mockUserRepository.getAllUsers.resolves(mockUsers);
+            const mockExpenses: Expense[] = [
+                new Expense(
+                    "Thé & biscuits",
+                    20,
+                    mockUsers[0]
+                ), 
+                new Expense(
+                    "Galettes des rois",
+                    30,
+                    mockUsers[1]
+                )
+            ];
+            mockExpenseRepository.getAllExpenses.resolves(mockExpenses);
+
+            const accountCalculator = new AccountCalculator(mockExpenseRepository, mockUserRepository);
+
+            const expectedExpenses: Map<User, Map<User, number>> = new Map<User, Map<User, number>>();
+            // user0 should pay 4€ to user1, user1 should have no debt and user2 should pay 4€ to user0 and 10€ to user1
+            const user0Debt: Map<User, number> = new Map<User, number>();
+            user0Debt.set(mockUsers[1], 4);
+            const user1Debt: Map<User, number> = new Map<User, number>();
+            const user2Debt: Map<User, number> = new Map<User, number>();
+            user2Debt.set(mockUsers[0], 6);
+            user2Debt.set(mockUsers[1], 10);
 
             expectedExpenses.set(mockUsers[0], user0Debt);
             expectedExpenses.set(mockUsers[1], user1Debt);
