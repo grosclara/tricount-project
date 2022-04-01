@@ -54,7 +54,7 @@ describe('CliAdapter', () => {
             const mockAccountCalculator = { getAccountBalance: sinon.stub(), getAllExpenses: sinon.stub()}
 
             mockUserRecorder.getAllUsers.resolves([new User("Clara"), new User("Paul")]);
-            mockTerminal.readInput.resolves('3') // exit app
+            mockTerminal.readInput.resolves('4') // exit app
 
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
 
@@ -107,7 +107,7 @@ describe('CliAdapter', () => {
             mockUserRecorder.createUser.onCall(1).resolves(user2);
             mockTerminal.readInput.onCall(5).resolves('N'); // add a user? (3st)
             mockUserRecorder.getAllUsers.onCall(2).resolves([user1, user2]) // one initial user
-            mockTerminal.readInput.onCall(6).resolves('3'); // exit
+            mockTerminal.readInput.onCall(6).resolves('4'); // exit
 
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
 
@@ -141,7 +141,7 @@ describe('CliAdapter', () => {
             mockUserRecorder.createUser.onCall(2).resolves(user2);
             mockTerminal.readInput.onCall(7).resolves('N'); // do not add user
             mockUserRecorder.getAllUsers.onCall(1).resolves([user1, user2]) // one initial user
-            mockTerminal.readInput.onCall(8).resolves('3'); // exit
+            mockTerminal.readInput.onCall(8).resolves('4'); // exit
 
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
 
@@ -171,7 +171,7 @@ describe('CliAdapter', () => {
             mockUserRecorder.createUser.onCall(1).resolves(user2); // create 2nd user
             mockTerminal.readInput.onCall(5).resolves('N'); // add 3rd user ?
             mockUserRecorder.getAllUsers.onCall(1).resolves([user1, user2])
-            mockTerminal.readInput.onCall(6).resolves('3'); // exit
+            mockTerminal.readInput.onCall(6).resolves('4'); // exit
 
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
 
@@ -204,7 +204,7 @@ describe('CliAdapter', () => {
             mockTerminal.readInput.onCall(1).resolves(expense.user.username); // expense user
             mockTerminal.readInput.onCall(2).resolves(expense.amount); // expense amount
             mockTerminal.readInput.onCall(3).resolves(expense.title); // expense title   
-            mockTerminal.readInput.onCall(4).resolves('3'); // expense title   
+            mockTerminal.readInput.onCall(4).resolves('4'); // exit   
             
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
             
@@ -231,7 +231,7 @@ describe('CliAdapter', () => {
             mockTerminal.readInput.onCall(1).resolves(expense.user.username); // expense user
             mockTerminal.readInput.onCall(2).resolves(expense.amount); // expense amount
             mockTerminal.readInput.onCall(3).resolves(expense.title); // expense title   
-            mockTerminal.readInput.onCall(4).resolves('3'); // expense title   
+            mockTerminal.readInput.onCall(4).resolves('4'); // exit   
             
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
             
@@ -259,7 +259,7 @@ describe('CliAdapter', () => {
             mockTerminal.readInput.onCall(1).resolves(expense.user.username); // expense user
             mockTerminal.readInput.onCall(2).resolves(expense.amount); // expense amount
             mockTerminal.readInput.onCall(3).resolves(expense.title); // expense title   
-            mockTerminal.readInput.onCall(4).resolves('3'); // expense title   
+            mockTerminal.readInput.onCall(4).resolves('4'); // exit   
             
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
             
@@ -291,8 +291,8 @@ describe('CliAdapter', () => {
             const mockUserRecorder = { getAllUsers: sinon.stub().resolves([user0, user1]), createUser: sinon.stub() }
             const mockAccountCalculator = { getAccountBalance: sinon.stub().resolves(expectedExpenses), getAllExpenses: sinon.stub() }
 
-            mockTerminal.readInput.onCall(0).resolves('2'); // get balance 
-            mockTerminal.readInput.onCall(1).resolves('3'); // exit   
+            mockTerminal.readInput.onCall(0).resolves('3'); // get balance 
+            mockTerminal.readInput.onCall(1).resolves('4'); // exit   
             
             const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
             
@@ -300,7 +300,38 @@ describe('CliAdapter', () => {
             await cli.start();
 
             // ASSERT
-            expect(mockTerminal.print).to.have.been.calledWith('Creditor: Clara\n\tDebtor: Paul | Amount: 3\nCreditor: Paul\n\tDebtor: Clara | Amount: 5\n')
+            expect(mockTerminal.print).to.have.been.calledWith("\nClara's debts\n\t- debt of 3€ to Paul\n\nPaul's debts\n\t- debt of 5€ to Clara\n")
+        });
+    }),
+    describe('Get expenses', () => {
+        it("[happy path] GIVEN an expense repo not empty, WHEN querying list of all expenses, THEN it should show the list of expenses", async () => {
+            // ARRANGE
+            const user0 = new User("Clara");
+            const user1 = new User('Paul');
+
+            const expense1 = new Expense("Thé & biscuits", 30, user0);
+            const expense2 = new Expense("Jeu de switch Pokémon Diamant", 60, user0);
+            const expense3 = new Expense("Mojito", 9, user1)
+
+            let expenseList = '';
+            [expense1, expense2, expense3].forEach(expense => expenseList = expenseList + `${expense.user.username} paid ${expense.amount} for ${expense.title}\n`);
+            
+            const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub() };
+            const mockExpenseRecorder = { recordExpense: sinon.stub() }
+            const mockUserRecorder = { getAllUsers: sinon.stub().resolves([user0, user1]), createUser: sinon.stub() }
+            const mockAccountCalculator = { getAccountBalance: sinon.stub(), getAllExpenses: sinon.stub().resolves([expense1, expense2, expense3]) }
+
+            mockTerminal.readInput.onCall(0).resolves('2'); // get list of expenses 
+            mockTerminal.readInput.onCall(1).resolves('4'); // exit   
+            
+            const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
+            
+            // ACT
+            await cli.start();
+
+            // ASSERT
+            expect(mockTerminal.print).to.have.been.calledWith('List of expenses:\n');
+            expect(mockTerminal.print).to.have.been.calledWith(expenseList);
         });
     })
 })

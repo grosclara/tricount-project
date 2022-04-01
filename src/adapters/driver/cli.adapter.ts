@@ -41,14 +41,16 @@ export class CliAdapter {
     private run(): Promise<void> {
         return this.terminal.print("Welcome to your Tricount!")
         .then(() => {
-            return this.terminal.readInput('Do you want to:\n1) Record a new expense?\n2) Get account balance?\n3) exit?\n')
+            return this.terminal.readInput('Do you want to:\n1) Record a new expense?\n2) See all expenses?\n3) Get account balance?\n4) Exit?\n')
         })
         .then((input) => {
             if (input === '1')
                 return this.addExpense();
             else if (input === '2')
+                return this.getAllExpenses();
+            else if (input === '3')
                 return this.getBalance();
-            if (input === '3')
+            if (input === '4')
                 return this.terminal.print('ok bye!\n')
             else {
                 return this.terminal.print('You must select one of the options')
@@ -167,6 +169,21 @@ export class CliAdapter {
                 })
             })
             return this.terminal.print(accountString);
+        })
+        .finally(() => {
+            return this.run();
+        })
+    }
+
+    private getAllExpenses() : Promise<void> {
+        return this.terminal.print('\List of expenses:\n')
+        .then(() => {
+            return this.accountingBalancer.getAllExpenses()
+        })
+        .then((expenses) => {
+            let expenseString = ""
+            expenses.forEach(expense => expenseString = expenseString + `${expense.user.username} paid ${expense.amount} for ${expense.title}\n`);
+            return this.terminal.print(expenseString)
         })
         .finally(() => {
             return this.run();
