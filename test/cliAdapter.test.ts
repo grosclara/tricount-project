@@ -9,6 +9,7 @@ import { AlreadyExistingUserError } from '../src/errors/AlreadyExistingUserError
 import { Expense } from '../src/hexagon/models/Expense';
 import { InvalidAmountError } from '../src/errors/InvalidAmountError';
 import { UnknownUserError } from '../src/errors/UnknownUserError';
+import { BlankUsernameError } from '../src/errors/BlankUsernameError';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -86,7 +87,95 @@ describe('CliAdapter', () => {
             expect(mockTerminal.print).to.be.not.calledWith('Welcome to your Tricount!');
             expect(mockTerminal.print).to.be.calledWith('ok bye!');
         });
-        it('GIVEN a new CLI with with one member, WHEN one wants to validate the Tricount creation with exactly 1 member, THEN it should print a warning message and ask for adding another user', async () => {
+        it('GIVEN a new CLI with with one member, WHEN one wants to create a Tricount, THEN it should print a message saying that we should add two users at least', async () => {
+            // ARRANGE
+            const user1 = new User("Clara");
+            const user2 = new User('Paul');
+            
+            const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub() };
+            const mockExpenseRecorder = { recordExpense: sinon.stub() }
+            const mockUserRecorder = { getAllUsers: sinon.stub().resolves([]), createUser: sinon.stub() }
+            const mockAccountCalculator = { getAccountBalance: sinon.stub(), getAllExpenses: sinon.stub() }
+
+            // tricount creation
+            mockUserRecorder.getAllUsers.onCall(0).resolves([]);
+            mockTerminal.readInput.onCall(0).resolves('y');
+
+            // 1st user creation
+            mockTerminal.readInput.onCall(1).resolves(user1.username); // enter 1st username 
+            mockUserRecorder.createUser.onCall(0).resolves(user1);
+            mockUserRecorder.getAllUsers.onCall(1).resolves([user1]);
+
+            // 2nd user creation
+            mockTerminal.readInput.onCall(2).resolves(user2.username); // enter 2nd username
+            mockUserRecorder.createUser.onCall(1).resolves(user2);
+            mockUserRecorder.getAllUsers.onCall(2).resolves([user1, user2]);
+
+            // exit
+            mockTerminal.readInput.onCall(3).resolves('N');
+            mockUserRecorder.getAllUsers.onCall(3).resolves([user1, user2]);
+            mockTerminal.readInput.onCall(4).resolves('4');
+
+            const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator);
+
+            // // ACT
+            await cli.start();
+
+            // ASSERT
+            expect(mockTerminal.print).to.be.calledWith('\nLet\'s add 2 users at least to create your tricount');
+            expect(mockTerminal.readInput).to.be.calledWith('Enter a unique username: ');
+            expect(mockTerminal.print).to.be.calledWith(`User ${user1.username} successfully added to the Tricount!\n`);
+            expect(mockTerminal.print).to.be.calledWith('Let\'s add a second user');
+            expect(mockTerminal.print).to.be.calledWith(`User ${user2.username} successfully added to the Tricount!\n`);
+            expect(mockTerminal.print).to.be.calledWith('ok bye!\n');
+
+            expect(mockUserRecorder.createUser).to.be.calledTwice;
+        });
+
+        it('GIVEN a new CLI with with no previous member, WHEN one wants to add a member with a blank username, THEN it should print a UserShouldNotHaveBlankUsername error', async () => {
+            // ARRANGE
+            const user1 = new User('Clara');
+            const user2 = new User('Paula');
+            
+            const mockTerminal = { print: sinon.stub().resolves(), readInput: sinon.stub() };
+            const mockExpenseRecorder = { recordExpense: sinon.stub() }
+            const mockUserRecorder = { getAllUsers: sinon.stub().resolves([]), createUser: sinon.stub() }
+            const mockAccountCalculator = { getAccountBalance: sinon.stub(), getAllExpenses: sinon.stub() }
+
+            // tricount creation
+            mockUserRecorder.getAllUsers.onCall(0).resolves([]);
+            mockTerminal.readInput.onCall(0).resolves('y');
+
+            // 1st user creation
+            mockTerminal.readInput.onCall(1).resolves(user1.username); // enter 1st username 
+            mockUserRecorder.createUser.onCall(0).resolves(user1);
+            mockUserRecorder.getAllUsers.onCall(1).resolves([user1]);
+
+            // 2nd user creation - with blank name
+            mockTerminal.readInput.onCall(2).resolves(''); // enter 2nd username
+            mockUserRecorder.createUser.onCall(1).rejects(new BlankUsernameError('User can not have blank name'));
+            mockUserRecorder.getAllUsers.onCall(2).resolves([user1]);
+
+            // 2nd user creation - with correct name
+            mockTerminal.readInput.onCall(3).resolves(user2.username); // enter 2nd username
+            mockUserRecorder.createUser.onCall(2).resolves(user2);
+            mockUserRecorder.getAllUsers.onCall(3).resolves([user1, user2]);
+
+            // exit
+            mockTerminal.readInput.onCall(4).resolves('N');
+            mockUserRecorder.getAllUsers.onCall(4).resolves([user1, user2]);
+            mockTerminal.readInput.onCall(5).resolves('4');
+
+            const cli = new CliAdapter(mockTerminal, mockExpenseRecorder, mockUserRecorder, mockAccountCalculator)
+
+            // // ACT
+            await cli.start();
+
+            // ASSERT
+            expect(mockTerminal.print).to.be.calledWith(`User can not have blank name`);
+        });
+        
+        it.skip('GIVEN a new CLI with with one member, WHEN one wants to validate the Tricount creation with exactly 1 member, THEN it should print a warning message and ask for adding another user', async () => {
             // ARRANGE
             const user1 = new User("Clara");
             const user2 = new User('Paul');
@@ -118,7 +207,7 @@ describe('CliAdapter', () => {
             expect(mockTerminal.print).to.be.calledWith('You must add at least two members in the Tricount!');
             expect(mockUserRecorder.createUser).to.be.calledTwice;
         });
-        it('GIVEN a new CLI with with no previous member, WHEN one wants to add 2 members with the same username, THEN it should print a AlreadyExistingUser error', async () => {
+        it.skip('GIVEN a new CLI with with no previous member, WHEN one wants to add 2 members with the same username, THEN it should print a AlreadyExistingUser error', async () => {
             // ARRANGE
             const user1 = new User("Clara");
             const user2 = new User('Paul');
@@ -151,7 +240,7 @@ describe('CliAdapter', () => {
             // ASSERT
             expect(mockTerminal.print).to.be.calledWith(`User ${user1.username} is already a member!`);
         });
-        it('[happy path] GIVEN a new CLI with with no previous member, WHEN one adds 2 distinct members and validate, THEN it should print a success message', async () => {
+        it.skip('[happy path] GIVEN a new CLI with with no previous member, WHEN one adds 2 distinct members and validate, THEN it should print a success message', async () => {
             // ARRANGE
             const user1 = new User("Clara");
             const user2 = new User('Paul');
