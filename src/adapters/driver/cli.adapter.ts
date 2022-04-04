@@ -5,6 +5,7 @@ import { Terminal } from "./terminal-helper";
 import { AlreadyExistingUserError } from "../../errors/AlreadyExistingUserError";
 import { InvalidAmountError } from "../../errors/InvalidAmountError";
 import { UnknownUserError } from "../../errors/UnknownUserError";
+import { BlankUsernameError } from "../../errors/BlankUsernameError";
 
 export class CliAdapter {
     private terminal: Terminal
@@ -63,17 +64,26 @@ export class CliAdapter {
     private createTricount(): Promise<boolean> {
         return this.terminal.readInput('Do you want to create a new Tricount? [y/N] ')
         .then((input) => {
-            if (input.toLowerCase() === 'y'){
-                return this.askForUserList().then(() => { return true} );
+            if (input.toLowerCase() === 'y') {
+                return this.createFirstUser().then(() => { return true});
             }
-            else {
-                return this.terminal.print('ok bye!').then(() => { return false} );
-            }
+            return this.terminal.print('ok bye!').then(() => { return false});
         })
     }
 
-    private askForUserList(): Promise<void> {
-        return this.terminal.readInput('Do you want to add a user? [y/N] ')
+    private createFirstUser(): Promise<void> {
+        return  this.terminal.print('\nLet\'s add 2 users at least to create your tricount').then(() => this.addUser());
+    }
+
+    private createSecondUser(): Promise<void> {
+        return this.terminal.print('Let\'s add a second user')
+                .then(() => {
+                    return this.addUser()
+                })
+    }
+
+    private askForAddMoreUsers(): Promise<void> {
+        return this.terminal.readInput('Do you want to add an other user? [y/N] ')
         .then((input) => {
             if (input.toLowerCase() === 'y')
                 return this.addUser();
@@ -89,30 +99,39 @@ export class CliAdapter {
                     else {
                         let userString = ""
                         users.forEach(user => userString = userString + user.username + "\n");
-                        return this.terminal.print(`Here are the members of you Tricount:\n${userString}`)
+                        return this.terminal.print(`Here are the members of you Tricount:\n${userString}`);
                     }
                 })
             }
         })
     }
 
+    private getUsersNbToCreateOtherUsers(): Promise<void> {
+        return this.userRecorder.getAllUsers()
+        .then((users) => {
+            if (users.length <= 1) {
+                return this.createSecondUser();
+            }
+            return this.askForAddMoreUsers();
+        })
+    }
+
     private addUser(): Promise<void> {
-        return this.terminal.readInput('\nEnter a unique username: ')
+        return this.terminal.readInput('Enter a unique username: ')
         .then((input) => {
             return this.userRecorder.createUser(input);
         })
         .then((user) => {
-            return this.terminal.print(`User ${user.username} successfully added to the Tricount!\n`)
+            return this.terminal.print(`User ${user.username} successfully added to the Tricount!\n`);
         })
         .then(() => {
-            return this.askForUserList();
+            return this.getUsersNbToCreateOtherUsers();
         })
         .catch((err) => {
             if (err instanceof AlreadyExistingUserError) {
-                return this.terminal.print(`User ${err.user.username} is already a member!`)
-                .then(() => {
-                    return this.askForUserList()
-                })
+                return this.terminal.print(`User ${err.user.username} is already a member!`).then(() => this.getUsersNbToCreateOtherUsers());
+            } else if (err instanceof BlankUsernameError) {
+                return this.terminal.print(err.message).then(() => this.getUsersNbToCreateOtherUsers());
             }
         })
     }

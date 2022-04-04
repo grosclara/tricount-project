@@ -11,6 +11,7 @@ chai.use(chaiAsPromised);
 import { User } from '../src/hexagon/models/User';
 import { UserRecorder } from '../src/hexagon/usecases/UserRecorder';
 import { AlreadyExistingUserError } from '../src/errors/AlreadyExistingUserError';
+import { BlankUsernameError } from '../src/errors/BlankUsernameError';
 
 describe('User Recorder', () => {
 	it('given an user Repository without any user, when adding a user with a username "Sophie" then it should add the user', async () => {
@@ -27,6 +28,22 @@ describe('User Recorder', () => {
 		// ASSERT
 		expect(mockUserRepository.createUser).to.have.been.calledOnce;
 		expect(result).to.eql(firstUser);
+	});
+
+	it('given an user Repository without any user, when adding a user with a blank username then it should throw an Error', async () => {
+		// ARRANGE
+		let username = '';
+
+		const mockUserRepository = { getAllUsers: sinon.stub().resolves([]), createUser: sinon.stub() };
+    	const userRecorder = new UserRecorder(mockUserRepository);
+
+		// ACT
+		const promise = userRecorder.createUser(username);
+	
+		// ASSERT
+		await expect(promise).to.be.rejectedWith(BlankUsernameError, 'User can not have blank name');
+		expect(mockUserRepository.getAllUsers).to.not.have.been.called;
+		expect(mockUserRepository.createUser).to.not.have.been.called;
 	});
 
 	it('given an user Repository with a user "Sophie", when adding a user with a username "Sophie" then it should fail with error "Already exists"', async () => {
